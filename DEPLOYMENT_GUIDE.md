@@ -41,13 +41,28 @@ SKIP_ENV_VALIDATION=false
 
 ## Database Setup
 
-1. **PlanetScale (Recommended)**:
+### Railway MySQL (Your Current Setup) ✅
+- ✅ Railway MySQL database created
+- ✅ Environment variables linked in Vercel
+- ✅ Database connection established
+
+**Next Steps:**
+1. **Run Database Migration**:
+   - After deployment, visit: `https://your-app.vercel.app/api/migrate`
+   - Use POST request to set up database schema
+   - Or run locally: `npx prisma migrate deploy`
+
+2. **Verify Database Health**:
+   - Check: `https://your-app.vercel.app/api/db-health`
+   - Should show "healthy" status and table count
+
+### Alternative Database Options:
+1. **PlanetScale**:
    - Create a free PlanetScale account
    - Create a new database
    - Get the connection string
-   - Add to `DATABASE_URL` in Vercel
 
-2. **Neon PostgreSQL Alternative**:
+2. **Neon PostgreSQL**:
    - If you prefer PostgreSQL, update `prisma/schema.prisma`:
    ```prisma
    datasource db {
