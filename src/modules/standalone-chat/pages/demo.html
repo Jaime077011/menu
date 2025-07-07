@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiter Assistant - Three Phone Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #8B4513, #D2B48C);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .demo-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+        
+        @media (max-width: 1024px) {
+            .demo-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- Phone 1: Greeting State -->
+        <div class="phone-frame">
+            <div class="status-bar">
+                <div class="time">9:41</div>
+                <div class="battery-wifi">
+                    <div class="signal">●●●</div>
+                    <div class="wifi">📶</div>
+                    <div class="battery">🔋</div>
+                </div>
+            </div>
+            
+            <div class="chat-container">
+                <div class="waiter-section">
+                    <div class="waiter-character greeting" id="waiterCharacter1">
+                        <div class="waiter-figure">
+                            <div class="waiter-head">
+                                <div class="waiter-face">😊</div>
+                                <div class="bow-tie"></div>
+                            </div>
+                            <div class="waiter-body">
+                                <div class="vest"></div>
+                                <div class="shirt"></div>
+                                <div class="waiter-arms">
+                                    <div class="arm left-arm"></div>
+                                    <div class="arm right-arm"></div>
+                                </div>
+                            </div>
+                            <div class="waiter-item">👋</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-messages">
+                    <div class="message bot-message">
+                        <div class="message-bubble">
+                            Hello! How can I assist you today?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-container">
+                    <button class="menu-button">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <input type="text" placeholder="Message..." class="message-input">
+                    <button class="send-button">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="home-indicator"></div>
+        </div>
+
+        <!-- Phone 2: Serving State -->
+        <div class="phone-frame">
+            <div class="status-bar">
+                <div class="time">9:41</div>
+                <div class="battery-wifi">
+                    <div class="signal">●●●</div>
+                    <div class="wifi">📶</div>
+                    <div class="battery">🔋</div>
+                </div>
+            </div>
+            
+            <div class="chat-container">
+                <div class="waiter-section">
+                    <div class="waiter-character serving" id="waiterCharacter2">
+                        <div class="waiter-figure">
+                            <div class="waiter-head">
+                                <div class="waiter-face">😊</div>
+                                <div class="bow-tie"></div>
+                            </div>
+                            <div class="waiter-body">
+                                <div class="vest"></div>
+                                <div class="shirt"></div>
+                                <div class="waiter-arms">
+                                    <div class="arm left-arm"></div>
+                                    <div class="arm right-arm"></div>
+                                </div>
+                            </div>
+                            <div class="waiter-item">🥩🥗</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-messages">
+                    <div class="message bot-message">
+                        <div class="message-bubble">
+                            Hello! How can I assist you today?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-container">
+                    <button class="menu-button">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <input type="text" placeholder="Message..." class="message-input">
+                    <button class="send-button">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="home-indicator"></div>
+        </div>
+
+        <!-- Phone 3: Dessert State -->
+        <div class="phone-frame">
+            <div class="status-bar">
+                <div class="time">9:41</div>
+                <div class="battery-wifi">
+                    <div class="signal">●●●</div>
+                    <div class="wifi">📶</div>
+                    <div class="battery">🔋</div>
+                </div>
+            </div>
+            
+            <div class="chat-container">
+                <div class="waiter-section">
+                    <div class="waiter-character dessert" id="waiterCharacter3">
+                        <div class="waiter-figure">
+                            <div class="waiter-head">
+                                <div class="waiter-face">😊</div>
+                                <div class="bow-tie"></div>
+                            </div>
+                            <div class="waiter-body">
+                                <div class="vest"></div>
+                                <div class="shirt"></div>
+                                <div class="waiter-arms">
+                                    <div class="arm left-arm"></div>
+                                    <div class="arm right-arm"></div>
+                                </div>
+                            </div>
+                            <div class="waiter-item">🍰☕</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-messages">
+                    <div class="message bot-message">
+                        <div class="message-bubble">
+                            Hello! How can I assist you today?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-container">
+                    <button class="menu-button">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <input type="text" placeholder="Message..." class="message-input">
+                    <button class="send-button">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="home-indicator"></div>
+        </div>
+    </div>
+
+    <script>
+        // Add the waiter character styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .waiter-figure {
+                width: 180px;
+                height: 280px;
+                position: relative;
+                margin: 0 auto;
+            }
+            
+            .waiter-head {
+                width: 80px;
+                height: 80px;
+                background: #FDBCB4;
+                border-radius: 50%;
+                position: absolute;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 3px solid #8B4513;
+            }
+            
+            .waiter-face {
+                font-size: 30px;
+            }
+            
+            .bow-tie {
+                position: absolute;
+                bottom: -10px;
+                width: 20px;
+                height: 12px;
+                background: #000;
+                clip-path: polygon(0 0, 100% 50%, 0 100%);
+            }
+            
+            .bow-tie::after {
+                content: '';
+                position: absolute;
+                right: -15px;
+                top: 0;
+                width: 20px;
+                height: 12px;
+                background: #000;
+                clip-path: polygon(100% 0, 0 50%, 100% 100%);
+            }
+            
+            .waiter-body {
+                width: 120px;
+                height: 160px;
+                position: absolute;
+                top: 90px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .vest {
+                width: 100%;
+                height: 120px;
+                background: #2C1810;
+                border-radius: 20px 20px 0 0;
+                position: relative;
+                border: 2px solid #8B4513;
+            }
+            
+            .shirt {
+                position: absolute;
+                top: 10px;
+                left: 20px;
+                right: 20px;
+                height: 100px;
+                background: white;
+                border-radius: 10px;
+            }
+            
+            .waiter-arms {
+                position: absolute;
+                top: 20px;
+                width: 100%;
+                height: 80px;
+            }
+            
+            .arm {
+                width: 15px;
+                height: 60px;
+                background: #FDBCB4;
+                border-radius: 7px;
+                position: absolute;
+                border: 1px solid #8B4513;
+            }
+            
+            .left-arm {
+                left: -10px;
+                transform-origin: top center;
+                animation: leftArmWave 3s infinite ease-in-out;
+            }
+            
+            .right-arm {
+                right: -10px;
+                transform-origin: top center;
+            }
+            
+            .waiter-item {
+                position: absolute;
+                bottom: 50px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 40px;
+                transition: all 0.5s ease;
+            }
+            
+            @keyframes leftArmWave {
+                0%, 100% { transform: rotate(-20deg); }
+                50% { transform: rotate(20deg); }
+            }
+            
+            .serving .right-arm {
+                transform: rotate(-45deg);
+            }
+            
+            .serving .waiter-item {
+                right: 20px;
+                transform: none;
+            }
+            
+            .dessert .right-arm {
+                transform: rotate(-30deg);
+            }
+            
+            .dessert .left-arm {
+                animation: none;
+                transform: rotate(30deg);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic Waiter Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="phone-container">
+        <div class="phone-frame">
+            <div class="status-bar">
+                <div class="time">9:41</div>
+                <div class="battery-wifi">
+                    <div class="signal">●●●</div>
+                    <div class="wifi">📶</div>
+                    <div class="battery">🔋</div>
+                </div>
+            </div>
+            
+            <div class="chat-container">
+                <div class="waiter-section">
+                    <div class="rive-character-container" id="riveContainer">
+                        <canvas id="riveCanvas" class="rive-canvas"></canvas>
+                        <div class="character-loading" id="characterLoading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading your waiter...</p>
+                        </div>
+                        <div class="character-error" id="characterError" style="display: none;">
+                            <p>⚠️ Character unavailable</p>
+                            <button onclick="waiterChat.retryRiveLoad()">Retry</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <div class="message-bubble">
+                            Hello! How can I assist you today?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-container">
+                    <button class="menu-button" id="menuButton">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <input type="text" id="messageInput" placeholder="Message..." class="message-input">
+                    <button class="send-button" id="sendButton">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="home-indicator"></div>
+        </div>
+    </div>
+    
+    <!-- Rive Runtime -->
+    <script src="https://unpkg.com/@rive-app/canvas@2.24.0"></script>
+    <script src="script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,90 @@
+{
+  "scripts": {
+    "// Development Scripts": "=== Development ===",
+    "dev": "next dev --turbo",
+    "dev:debug": "next dev --inspect",
+    "dev:clean": "rm -rf .next && npm run dev",
+    "dev:https": "next dev --experimental-https",
+    
+    "// Testing Scripts": "=== Testing ===",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "test:e2e": "playwright test",
+    "test:unit": "jest --testPathPattern=/unit/",
+    "test:integration": "jest --testPathPattern=/integration/",
+    
+    "// Build Scripts": "=== Build ===",
+    "build": "next build",
+    "build:analyze": "ANALYZE=true next build",
+    "build:debug": "next build --debug",
+    "build:profile": "next build --profile",
+    "start": "next start",
+    "preview": "next build && next start",
+    
+    "// Database Scripts": "=== Database ===",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset && npm run db:seed",
+    "db:backup": "node tools/scripts/backup-db.js",
+    
+    "// Code Quality Scripts": "=== Code Quality ===",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx,json,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx,json,css}\"",
+    "check": "npm run lint && npm run typecheck && npm run format:check",
+    "check:fix": "npm run lint:fix && npm run format",
+    
+    "// Repository Management": "=== Repository ===",
+    "clean": "rm -rf .next node_modules/.cache dist coverage",
+    "clean:all": "rm -rf .next node_modules/.cache dist coverage node_modules && npm install",
+    "setup": "npm install && npm run db:generate && npm run db:seed",
+    "update": "npm update && npm audit fix",
+    "repo:reorganize": "node tools/reorganize-repo.js",
+    "repo:tree": "tree -I node_modules",
+    
+    "// Health & Monitoring": "=== Health ===",
+    "health": "node tools/scripts/health-check.js",
+    "perf": "node tools/scripts/performance-check.js",
+    "security": "npm audit && node tools/scripts/security-check.js",
+    
+    "// Deployment Scripts": "=== Deployment ===",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel",
+    "deploy:check": "node tools/scripts/deployment-check.js",
+    "env:check": "node tools/scripts/env-check.js",
+    
+    "// Documentation": "=== Documentation ===",
+    "docs:generate": "node tools/scripts/generate-docs.js",
+    "docs:serve": "docsify serve docs",
+    "changelog": "node tools/scripts/generate-changelog.js"
+  },
+  
+  "// Additional package.json sections": "",
+  "husky": {
+    ".husky/pre-commit": "npm run check",
+    ".husky/pre-push": "npm run test:ci"
+  },
+  
+  "lint-staged": {
+    "**/*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+} 

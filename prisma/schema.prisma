@@ -1,0 +1,561 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+  // Further reading:
+  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  createdById String
+
+  @@index([name])
+}
+
+// Necessary for Next auth
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String? @db.Text
+  access_token             String? // @db.Text
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String? // @db.Text
+  session_state            String?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refresh_token_expires_in Int?
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  posts         Post[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Restaurant {
+  id         String            @id @default(cuid())
+  name       String
+  subdomain  String            @unique
+  createdAt  DateTime          @default(now())
+  menuItems  MenuItem[]
+  orders     Order[]
+  adminUsers AdminUser[]
+  sessions   CustomerSession[] // Customer sessions
+  
+  // Waiter Personality Customization
+  waiterName        String?
+  waiterPersonality String? // FRIENDLY, PROFESSIONAL, CASUAL, ENTHUSIASTIC
+  welcomeMessage    String? @db.Text
+  conversationTone  String? // FORMAL, BALANCED, CASUAL
+  specialtyKnowledge String? @db.Text
+  responseStyle     String? // HELPFUL, CONCISE, DETAILED, PLAYFUL
+  waiterPersonalityTemplate WaiterPersonalityTemplate? @relation(fields: [waiterPersonalityTemplateId], references: [id])
+  waiterPersonalityTemplateId String?
+  
+  // Subscription fields
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  trialEndsAt        DateTime?                       // When trial expires
+  stripeCustomerId   String?                         // Stripe customer ID for billing
+  
+  // Relations
+  subscription       RestaurantSubscription?
+  usageMetrics       UsageMetric[]
+  features           RestaurantFeature[]
+  registration       RestaurantRegistration?
+
+  @@index([waiterPersonalityTemplateId])
+}
+
+model AdminUser {
+  id           String     @id @default(cuid())
+  restaurantId String
+  email        String     @unique
+  passwordHash String
+  role         String     @default("ADMIN")
+  createdAt    DateTime   @default(now())
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model SuperAdmin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         String   @default("SUPER_ADMIN")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lastLoginAt  DateTime?
+  
+  // Relations
+  sessions     SuperAdminSession[]
+  auditLogs    SuperAdminAuditLog[]
+  personalityTemplates WaiterPersonalityTemplate[]
+  knowledgeSnippets KnowledgeSnippet[]
+  templateKnowledgeAssignments TemplateKnowledge[]
+}
+
+model SuperAdminSession {
+  id             String     @id @default(cuid())
+  superAdminId   String
+  isActive       Boolean    @default(true)
+  expiresAt      DateTime
+  createdAt      DateTime   @default(now())
+  lastActivityAt DateTime   @default(now())
+  revokedAt      DateTime?
+  ipAddress      String?
+  userAgent      String?
+  
+  // Relations
+  superAdmin     SuperAdmin @relation(fields: [superAdminId], references: [id], onDelete: Cascade)
+  
+  @@index([superAdminId, isActive])
+  @@index([expiresAt])
+}
+
+model SuperAdminAuditLog {
+  id           String     @id @default(cuid())
+  superAdminId String
+  action       String     // LOGIN, LOGOUT, CREATE_RESTAURANT, DELETE_USER, etc.
+  details      String?    // JSON string with action details
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime   @default(now())
+  
+  // Relations
+  superAdmin   SuperAdmin @relation(fields: [superAdminId], references: [id], onDelete: Cascade)
+  
+  @@index([superAdminId, createdAt])
+  @@index([action])
+}
+
+model RolePermission {
+  id           String   @id @default(cuid())
+  role         String   @unique  // SUPER_ADMIN, SUPPORT_ADMIN, etc.
+  permissions  String   @db.Text  // JSON string with all permissions
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdBy    String?  // SuperAdmin ID who created/modified this
+  
+  @@index([role])
+}
+
+model MenuItem {
+  id           String       @id @default(cuid())
+  restaurantId String
+  name         String
+  description  String
+  category     String
+  price        Decimal
+  available    Boolean      @default(true)
+  imageUrl     String?      // URL to the menu item image
+  imageAlt     String?      // Alt text for accessibility
+  restaurant   Restaurant   @relation(fields: [restaurantId], references: [id])
+  orderItems   OrderItem[]
+  dietaryTags  DietaryTag[]
+
+  @@unique([restaurantId, name])
+}
+
+model DietaryTag {
+  id         String   @id @default(cuid())
+  value      String
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@unique([menuItemId, value])
+}
+
+model CustomerSession {
+  id           String        @id @default(cuid())
+  customerName String?
+  tableNumber  String
+  restaurantId String
+  startTime    DateTime      @default(now())
+  endTime      DateTime?
+  status       SessionStatus @default(ACTIVE)
+  totalOrders  Int           @default(0)
+  totalSpent   Decimal       @default(0)
+  notes        String?
+  orders       Order[]
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
+  
+  @@map("customer_sessions")
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  restaurantId String
+  sessionId    String?     // Link to customer session
+  tableNumber  String
+  customerName String?     // Keep for backward compatibility
+  total        Decimal     @default(0)
+  status       OrderStatus @default(PENDING)
+  notes        String?
+  createdAt    DateTime    @default(now())
+  servedAt     DateTime?
+  items        OrderItem[]
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  session      CustomerSession? @relation(fields: [sessionId], references: [id])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  menuItemId  String
+  quantity    Int
+  priceAtTime Decimal
+  notes       String?
+  order       Order    @relation(fields: [orderId], references: [id])
+  menuItem    MenuItem @relation(fields: [menuItemId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  READY
+  SERVED
+  CANCELLED
+}
+
+enum SessionStatus {
+  ACTIVE      // Session is ongoing
+  COMPLETED   // Session ended normally (all orders served)
+  ABANDONED   // Session ended without completion
+  CANCELLED   // Session was cancelled
+}
+
+// ============================================================================
+// SUBSCRIPTION MODELS
+// ============================================================================
+
+model SubscriptionPlan {
+  id              String   @id @default(cuid())
+  name            String   @unique              // STARTER, PROFESSIONAL, ENTERPRISE
+  displayName     String                       // "Starter Plan", "Professional Plan"
+  description     String?                      // Plan description
+  price           Decimal                      // Monthly price
+  yearlyPrice     Decimal?                     // Yearly price (if different from monthly * 12)
+  billingInterval BillingInterval @default(MONTHLY)
+  maxLocations    Int      @default(1)         // Maximum restaurant locations
+  maxMenuItems    Int      @default(50)        // Maximum menu items per location
+  maxOrders       Int      @default(100)       // Maximum orders per month
+  maxUsers        Int      @default(2)         // Maximum admin users
+  maxWaiters      Int      @default(1)         // Maximum waiter personalities available
+  features        String?  @db.Text            // JSON string of feature flags
+  isActive        Boolean  @default(true)      // Whether plan is available for new subscriptions
+  sortOrder       Int      @default(0)         // Display order
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Stripe Integration Fields
+  stripeProductId      String?  @unique        // Stripe product ID
+  stripePriceMonthlyId String?  @unique        // Stripe price ID for monthly billing
+  stripePriceYearlyId  String?  @unique        // Stripe price ID for yearly billing
+  stripeArchived       Boolean  @default(false) // Whether archived in Stripe
+  
+  // Enhanced Validation Fields
+  minimumPrice     Decimal?                    // Minimum allowed price for this plan type
+  maximumPrice     Decimal?                    // Maximum allowed price for this plan type
+  validationRules  String?  @db.Text          // JSON string of validation rules
+  featureSchema    String?  @db.Text          // JSON schema for features validation
+  
+  // Usage Analytics Relations
+  subscriptions    RestaurantSubscription[]
+  analytics        PlanAnalytics[]
+  
+  @@index([isActive, sortOrder])
+  @@index([stripeProductId])
+  @@index([stripePriceMonthlyId])
+  @@index([stripePriceYearlyId])
+}
+
+model PlanAnalytics {
+  id                    String   @id @default(cuid())
+  planId                String
+  period                DateTime // Start of the period (e.g., start of month)
+  periodType            String   // DAILY, WEEKLY, MONTHLY, YEARLY
+  
+  // Revenue Metrics
+  totalRevenue          Decimal  @default(0)
+  monthlyRecurringRevenue Decimal @default(0)
+  averageRevenuePerUser Decimal  @default(0)
+  
+  // Subscription Metrics
+  newSubscriptions      Int      @default(0)
+  cancelledSubscriptions Int     @default(0)
+  activeSubscriptions   Int      @default(0)
+  trialSubscriptions    Int      @default(0)
+  
+  // Conversion Metrics
+  trialToActiveConversions Int   @default(0)
+  conversionRate        Decimal  @default(0)
+  churnRate            Decimal  @default(0)
+  
+  // Usage Metrics
+  totalOrders          Int      @default(0)
+  totalMenuItems       Int      @default(0)
+  totalRestaurants     Int      @default(0)
+  averageOrdersPerRestaurant Decimal @default(0)
+  
+  // Engagement Metrics
+  activeRestaurants    Int      @default(0)
+  averageSessionDuration Decimal @default(0)
+  
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
+  // Relations
+  plan                 SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  
+  @@unique([planId, period, periodType])
+  @@index([planId, period])
+  @@index([period, periodType])
+}
+
+model RestaurantSubscription {
+  id                    String             @id @default(cuid())
+  restaurantId          String             @unique // One subscription per restaurant
+  planId                String
+  status                SubscriptionStatus @default(TRIAL)
+  currentPeriodStart    DateTime
+  currentPeriodEnd      DateTime
+  trialEnd              DateTime?          // When trial expires
+  cancelAtPeriodEnd     Boolean            @default(false)
+  cancelledAt           DateTime?
+  stripeCustomerId      String?            // Stripe customer ID
+  stripeSubscriptionId  String?            // Stripe subscription ID
+  stripePriceId         String?            // Stripe price ID
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  
+  // Relations
+  restaurant            Restaurant         @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  plan                  SubscriptionPlan   @relation(fields: [planId], references: [id])
+  
+  @@index([status])
+  @@index([currentPeriodEnd])
+  @@index([stripeSubscriptionId])
+}
+
+model UsageMetric {
+  id           String      @id @default(cuid())
+  restaurantId String
+  metricType   MetricType
+  value        Int
+  period       DateTime    // Start of the period (e.g., start of month)
+  recordedAt   DateTime    @default(now())
+  
+  // Relations
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  @@unique([restaurantId, metricType, period])
+  @@index([restaurantId, metricType])
+  @@index([period])
+}
+
+model RestaurantFeature {
+  id           String     @id @default(cuid())
+  restaurantId String
+  featureName  String     // Feature identifier (e.g., "CUSTOM_BRANDING", "API_ACCESS")
+  isEnabled    Boolean    @default(false)
+  enabledAt    DateTime?  // When feature was enabled
+  expiresAt    DateTime?  // When feature expires (for temporary features)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  
+  // Relations
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  @@unique([restaurantId, featureName])
+  @@index([restaurantId, isEnabled])
+  @@index([expiresAt])
+}
+
+// ============================================================================
+// SUBSCRIPTION ENUMS
+// ============================================================================
+
+enum SubscriptionStatus {
+  TRIAL       // Free trial period
+  ACTIVE      // Active paid subscription
+  PAST_DUE    // Payment failed, grace period
+  CANCELLED   // Cancelled, but still active until period end
+  UNPAID      // Payment failed, subscription suspended
+  INCOMPLETE  // Stripe subscription incomplete
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum MetricType {
+  ORDERS          // Number of orders processed
+  MENU_ITEMS      // Number of menu items created
+  API_CALLS       // Number of API calls made
+  STORAGE_MB      // Storage used in MB
+  ADMIN_USERS     // Number of admin users
+}
+
+// ============================================================================
+// RESTAURANT REGISTRATION MODELS
+// ============================================================================
+
+model RestaurantRegistration {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  restaurantName    String
+  ownerName         String
+  phone             String?
+  address           String?
+  city              String?
+  state             String?
+  zipCode           String?
+  country           String             @default("US")
+  subdomain         String             @unique
+  selectedPlan      String             // Plan ID they selected
+  status            RegistrationStatus @default(PENDING)
+  verificationToken String?            @unique
+  verifiedAt        DateTime?
+  rejectionReason   String?            // If rejected, why?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  // Link to actual restaurant once approved
+  restaurantId      String?            @unique
+  restaurant        Restaurant?        @relation(fields: [restaurantId], references: [id])
+  
+  // Stripe integration for payment
+  stripeCustomerId        String?         // Created during registration
+  stripeCheckoutSessionId String?         // Checkout session ID
+  stripeSubscriptionId    String?         // Subscription ID after payment
+  paymentMethod           String?         // Payment method type (card, etc.)
+  paymentCompleted        Boolean         @default(false)
+  paymentCompletedAt      DateTime?
+  trialEndsAt            DateTime?        // When trial period ends
+  
+  // Provisioning tracking
+  provisioningStartedAt   DateTime?       // When provisioning began
+  provisioningCompletedAt DateTime?       // When provisioning finished
+  provisioningErrors      String?         // JSON array of any provisioning errors
+  adminPassword          String?          // Temporary encrypted password for first login
+  
+  @@index([status])
+  @@index([email])
+  @@index([subdomain])
+  @@index([createdAt])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+}
+
+enum RegistrationStatus {
+  PENDING           // Just registered, email not verified
+  VERIFIED          // Email verified, waiting for payment
+  PAYMENT_PENDING   // Payment in progress
+  PAYMENT_COMPLETED // Payment successful, ready for provisioning
+  PROVISIONING      // Restaurant being set up
+  COMPLETED         // Registration complete, restaurant active
+  REJECTED          // Registration rejected
+  CANCELLED         // Registration cancelled
+  FAILED            // Provisioning or payment failed
+}
+
+model WaiterPersonalityTemplate {
+  id                  String      @id @default(cuid())
+  name                String      @unique
+  description         String      @db.Text
+  tone                String      // FORMAL, BALANCED, CASUAL
+  responseStyle       String      // HELPFUL, CONCISE, DETAILED, PLAYFUL
+  defaultWelcomeMessage String?   @db.Text
+  isActive           Boolean     @default(true)
+  // Plan tier requirements (controls access)
+  minimumPlan        String?     // Minimum plan required (STARTER, PROFESSIONAL, ENTERPRISE)
+  isPremium          Boolean     @default(false) // Premium templates for higher tiers
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  createdById        String
+  createdBy          SuperAdmin  @relation(fields: [createdById], references: [id])
+  restaurants        Restaurant[]
+  knowledge          TemplateKnowledge[]
+
+  @@index([createdById])
+  @@index([minimumPlan])
+  @@index([isPremium])
+}
+
+model KnowledgeSnippet {
+  id          String      @id @default(cuid())
+  title       String
+  content     String      @db.Text
+  category    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  createdById String
+  createdBy   SuperAdmin  @relation(fields: [createdById], references: [id])
+  templates   TemplateKnowledge[]
+
+  @@index([category])
+  @@index([createdById])
+}
+
+// Many-to-many relationship between templates and knowledge
+model TemplateKnowledge {
+  id         String                    @id @default(cuid())
+  templateId String
+  snippetId  String
+  createdAt  DateTime                  @default(now())
+  createdBy  String                    // SuperAdmin who assigned the knowledge
+  
+  template   WaiterPersonalityTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  snippet    KnowledgeSnippet          @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+  assigner   SuperAdmin                @relation(fields: [createdBy], references: [id])
+  
+  @@unique([templateId, snippetId])
+  @@index([templateId])
+  @@index([snippetId])
+  @@index([createdBy])
+}
+
+
