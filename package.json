@@ -29,7 +29,9 @@
     "test:ci": "jest --coverage --watchAll=false --passWithNoTests",
     "clean": "rm -rf .next node_modules/.cache",
     "setup": "npm install && npm run db:generate && npm run db:seed",
-    "export:menu": "tsx scripts/export-menu-data.ts"
+    "export:menu": "tsx scripts/export-menu-data.ts",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

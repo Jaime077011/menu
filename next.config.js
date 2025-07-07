@@ -8,9 +8,30 @@ import "./src/env.js";
 const config = {
   reactStrictMode: true,
 
-  // Temporarily ignore TypeScript errors during build
+  // TypeScript configuration
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: process.env.NODE_ENV === "production",
+  },
+
+  // ESLint configuration
+  eslint: {
+    ignoreDuringBuilds: process.env.NODE_ENV === "production",
+  },
+
+  // Image optimization
+  images: {
+    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
+  },
+
+  // Experimental features
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client'],
   },
 
   /**
