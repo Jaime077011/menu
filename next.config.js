@@ -29,10 +29,8 @@ const config = {
     ],
   },
 
-  // Experimental features
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client'],
-  },
+  // Server external packages
+  serverExternalPackages: ['@prisma/client'],
 
   /**
    * If you are using `appDir` then you must comment the below `i18n` config out.
